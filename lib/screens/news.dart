@@ -9,19 +9,18 @@ import 'package:news/news_bloc.dart';
 import 'package:news/services/api.dart';
 import 'package:provider/provider.dart';
 
-
 class Test {
   final String name;
 
   Test(this.name);
 
-  Test.fromJson(Map<String, dynamic> json)
-      : name = json['name'];
+  Test.fromJson(Map<String, dynamic> json) : name = json['name'];
 
   Map<String, dynamic> toJson() => {
-    'name' : name,
-  };
+        'name': name,
+      };
 }
+
 class News extends StatefulWidget {
   News() : super();
 
@@ -35,7 +34,7 @@ class _NewsState extends State<News> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _tabController = getTabController();
+    _tabController = TabController(length: CategoriesEnum.values.length, vsync: this);
     _tabController.addListener(_handleTabSelection);
 
     final bloc = Provider.of<NewsBloc>(context, listen: false);
@@ -50,7 +49,6 @@ class _NewsState extends State<News> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-
     final bloc = Provider.of<NewsBloc>(context);
     return Scaffold(
       appBar: AppBar(
@@ -59,64 +57,44 @@ class _NewsState extends State<News> with TickerProviderStateMixin {
           style: Theme.of(context).textTheme.headline1,
         ),
         bottom: TabBar(
+          isScrollable: true,
           labelColor: Colors.black,
-          tabs: [getTab("Headlines"), getTab("business")],
+          tabs: categories,
           controller: _tabController,
         ),
       ),
       body: new Container(
           child: new Center(
-              child: TabBarView(controller: _tabController, children: [
-        RefreshIndicator(
-            onRefresh: () => _refresh(context),
-            child: Consumer<ArticlesHolder>(
-              builder: (context, holder, child) {
-                return ListView.builder(
-                    itemCount: holder.articles.length,
-                    itemBuilder: (context, position) => Text(
-                          holder.articles[position].title,
-                          style: Theme.of(context).textTheme.headline1,
-                        ));
-              },
-            )),
-        RefreshIndicator(
-            onRefresh: () => _refresh(context),
-            child:
-
-            StreamBuilder<List<Article>>(
-              stream: bloc.articles.stream,
-              builder: (context, AsyncSnapshot<List<Article>> snapshot) {
-                if (snapshot.hasData) {
-//                  if (snapshot.data.length > 0) {
+        child: RefreshIndicator(
+            onRefresh: () => _refresh(),
+            child: StreamBuilder<List<Article>>(
+                stream: bloc.articles,
+                builder: (context, AsyncSnapshot<List<Article>> snapshot) {
+                  if (snapshot.hasData) {
                     return ListView.builder(
                         itemCount: snapshot.data.length,
                         itemBuilder: (context, position) =>
                             NewsItem(snapshot.data[position]));
-//                  }
-                }else
-                  return Container();
-              }))
-      ]))),
+                  } else
+                    return CircularProgressIndicator();
+                })),
+      )),
     );
   }
 
-  TabController getTabController() {
-    return TabController(length: 2, vsync: this);
-  }
-
-  Tab getTab(String category) {
-    return Tab(
-      text: category,
-    );
-  }
-
-  Future<bool> _refresh(BuildContext context) async {
-    await Api().fetchArticles(context: context, category: "business");
+  Future<bool> _refresh() async {
+    _handleTabSelection();
     return true;
   }
 
   void _handleTabSelection() async {
-    if (_tabController.index == 1)
-      await Api().fetchArticles(context: context, category: "business");
+    if (!_tabController.indexIsChanging) {
+      final bloc = Provider.of<NewsBloc>(context, listen: false);
+      bloc.changeCategory(_tabController.index);
+    }else print("Tab is switching..from active to inactive");
   }
+
+  get categories => CategoriesEnum.values
+      .map((e) => Tab(text: categoryName(e).toUpperCase()))
+      .toList();
 }
