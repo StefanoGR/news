@@ -6,6 +6,8 @@ import 'package:news/model/article.dart';
 import 'package:news/services/db_repository.dart';
 import 'package:provider/provider.dart';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 class NewsItem extends StatefulWidget {
 
   final Article article;
@@ -33,8 +35,9 @@ class _NewsItemState extends State<NewsItem> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Container(
-              child: CachedNetworkImage(
+            LimitedBox(
+              maxHeight: 300,
+              child: kIsWeb ? NetworkImage(widget.article.urlToImage):CachedNetworkImage(
                 imageUrl: widget.article.urlToImage,
                 placeholder: (context, url) =>
                     center(CircularProgressIndicator()),
