@@ -3,13 +3,8 @@ import 'dart:collection';
 import 'package:dio/dio.dart';
 import 'package:dio_flutter_transformer/dio_flutter_transformer.dart';
 import 'package:dio_http_cache/dio_http_cache.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:news/model/article.dart';
-import 'package:news/model/articlesHolder.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 const String API = "https://newsapi.org/v2/";
