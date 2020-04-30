@@ -39,9 +39,13 @@ class _NewsItemState extends State<NewsItem> {
                     maxHeight: 300,
                     child: Center(
                       child: kIsWeb
-                          ? Image.network(widget.article.urlToImage)
+                          ? Image.network(
+                              widget.article.urlToImage,
+                              fit: BoxFit.fitWidth,
+                            )
                           : CachedNetworkImage(
                               imageUrl: widget.article.urlToImage,
+                              fit: BoxFit.fitWidth,
                               placeholder: (context, url) =>
                                   center(CircularProgressIndicator()),
                               errorWidget: (context, url, error) =>
